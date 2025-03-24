@@ -1,7 +1,14 @@
+const { Region } = require("../models");
+
 class RegionController {
-    static getAll(req, res) {
-        // TODO: Implement getAll logic
+  static async getAll(req, res, next) {
+    try {
+      const regions = await Region.findAll();
+      res.status(200).json(regions);
+    } catch (error) {
+      next(error);
     }
+  }
 }
 
 module.exports = RegionController;
