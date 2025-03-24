@@ -1,10 +1,38 @@
-const { Recipe } = require("../models");
+const { Op } = require("sequelize");
+const { Recipe, Region } = require("../models");
 
 class RecipeController {
   static async getAll(req, res, next) {
     try {
-      const recipes = await Recipe.findAll();
-      res.status(200).json(recipes);
+      const { q, regionId, page = 1 } = req.query;
+      const limit = 10;
+      const offset = (page - 1) * limit;
+
+      const where = {};
+      if (q) {
+        where.name = { [Op.iLike]: `%${q}%` };
+      }
+      if (regionId) {
+        where.RegionId = regionId;
+      }
+
+      const recipes = await Recipe.findAndCountAll({
+        where,
+        include: {
+          model: Region,
+          attributes: ["name"],
+        },
+        order: [["name", "ASC"]],
+        limit,
+        offset,
+      });
+
+      res.status(200).json({
+        totalItems: recipes.count,
+        totalPages: Math.ceil(recipes.count / limit),
+        currentPage: parseInt(page),
+        recipes: recipes.rows,
+      });
     } catch (error) {
       next(error);
     }
