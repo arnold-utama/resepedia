@@ -11,23 +11,24 @@ export default function MyRecipesPage() {
   const [selectedRegion, setSelectedRegion] = useState("");
   const isEditable = true;
 
-  useEffect(() => {
-    async function fetchMyRecipes() {
-      try {
-        const { data } = await api.get(`/my-recipes`, {
-          headers: {
-            Authorization: `Bearer ${access_token}`,
-          },
-          params: {
-            q: search,
-            regionId: selectedRegion,
-          },
-        });
-        setMyRecipes(data.recipes);
-      } catch (error) {
-        console.log("🚀 ~ fetchMyRecipes ~ error:", error);
-      }
+  async function fetchMyRecipes() {
+    try {
+      const { data } = await api.get(`/my-recipes`, {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+        },
+        params: {
+          q: search,
+          regionId: selectedRegion,
+        },
+      });
+      setMyRecipes(data.recipes);
+    } catch (error) {
+      console.log("🚀 ~ fetchMyRecipes ~ error:", error);
     }
+  }
+
+  useEffect(() => {
     fetchMyRecipes();
   }, [search, selectedRegion]);
 
@@ -42,6 +43,41 @@ export default function MyRecipesPage() {
     }
     fetchRegions();
   }, []);
+
+  async function handleDelete(id) {
+    window.Swal.fire({
+      title: "Are you sure you want to delete this recipe?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Delete",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await api.delete(`/recipes/${id}`, {
+            headers: { Authorization: `Bearer ${access_token}` },
+          });
+          window.Swal.fire({
+            title: "Success!",
+            text: `${response.data.message}`,
+            icon: "success",
+          });
+          fetchMyRecipes();
+        } catch (error) {
+          console.log("🚀 ~ handleDelete ~ error:", error);
+          if (error.response?.data?.message) {
+            window.Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: `${error.response.data.message}`,
+            });
+          }
+        }
+      }
+    });
+  }
 
   return (
     <div className="py-4 flex-grow-1">
@@ -76,7 +112,7 @@ export default function MyRecipesPage() {
           </div>
         </div>
         <div className="mb-4">
-          <Link to="/add-recipe" className="btn btn-primary">
+          <Link to="/recipes/add" className="btn btn-primary">
             Add Recipe
           </Link>
         </div>
@@ -96,6 +132,7 @@ export default function MyRecipesPage() {
                 recipe={recipe}
                 index={index}
                 isEditable={isEditable}
+                handleDelete={handleDelete}
               />
             ))}
           </tbody>
