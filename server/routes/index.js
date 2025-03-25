@@ -5,6 +5,9 @@ const { authenticate } = require("../middlewares/auth");
 const guardOwner = require("../middlewares/guardOwner");
 const errorHandler = require("../middlewares/errorHandler");
 const router = require("express").Router();
+const multer = require("multer");
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 router.get("/", (req, res) => res.redirect("/recipes"));
 router.post("/login", UserController.login);
@@ -15,8 +18,8 @@ router.get("/recipes/:id/generate", RecipeController.generate);
 router.get("/regions", RegionController.getAll);
 
 router.use(authenticate);
-router.post("/recipes", RecipeController.create);
-router.put("/recipes/:id", guardOwner, RecipeController.update);
+router.post("/recipes", upload.single("file"), RecipeController.create);
+router.put("/recipes/:id", upload.single("file"), guardOwner, RecipeController.update);
 router.delete("/recipes/:id", guardOwner, RecipeController.delete);
 
 router.use(errorHandler);

@@ -1,6 +1,13 @@
 const { Op } = require("sequelize");
 const { Recipe, Region } = require("../models");
 const { generateContent } = require("../helpers/gemini");
+const cloudinary = require("cloudinary").v2;
+
+cloudinary.config({
+  cloud_name: process.env.cloud_name,
+  api_key: process.env.api_key,
+  api_secret: process.env.api_secret,
+});
 
 class RecipeController {
   static async getAll(req, res, next) {
@@ -56,7 +63,6 @@ class RecipeController {
     try {
       const {
         name,
-        imageUrl,
         ingredient1,
         ingredient2,
         ingredient3,
@@ -101,6 +107,21 @@ class RecipeController {
         RegionId,
       } = req.body;
       const UserId = req.user.id;
+
+      let imageUrl = null;
+      if (req.file) {
+        let mimetype = req.file.mimetype;
+        let base64Image = req.file.buffer.toString("base64");
+        const uploadResult = await cloudinary.uploader.upload(
+          `data:${mimetype};base64,${base64Image}`,
+          {
+            folder: "Phase 2",
+            public_id: req.file.originalname.split(".")[0],
+          }
+        );
+        imageUrl = uploadResult.secure_url;
+      }
+
       const newRecipe = await Recipe.create({
         name,
         imageUrl,
@@ -159,7 +180,6 @@ class RecipeController {
     try {
       const {
         name,
-        imageUrl,
         ingredient1,
         ingredient2,
         ingredient3,
@@ -203,6 +223,21 @@ class RecipeController {
         instructions,
         RegionId,
       } = req.body;
+
+      let imageUrl = req.recipe.imageUrl;
+      if (req.file) {
+        let mimetype = req.file.mimetype;
+        let base64Image = req.file.buffer.toString("base64");
+        const uploadResult = await cloudinary.uploader.upload(
+          `data:${mimetype};base64,${base64Image}`,
+          {
+            folder: "Phase 2",
+            public_id: req.file.originalname.split(".")[0],
+          }
+        );
+        imageUrl = uploadResult.secure_url;
+      }
+
       const updatedRecipe = await req.recipe.update({
         name,
         imageUrl,
@@ -249,6 +284,7 @@ class RecipeController {
         instructions,
         RegionId,
       });
+
       res.status(200).json(updatedRecipe);
     } catch (error) {
       console.log(error);
@@ -284,10 +320,13 @@ class RecipeController {
       const result = await generateContent(prompt);
 
       try {
-        const parsedResult = JSON.parse(result.replace(/^```json\n|```$/g, ''));
+        const parsedResult = JSON.parse(result.replace(/^```json\n|```$/g, ""));
         res.status(200).json(parsedResult);
       } catch (error) {
-        throw { name: "ParsingError", message: "Failed to parse generated content" };
+        throw {
+          name: "ParsingError",
+          message: "Failed to parse generated content",
+        };
       }
     } catch (error) {
       next(error);
