@@ -1,28 +1,34 @@
 import { useEffect, useState } from "react";
 import { api } from "../helpers/http-client";
 import RecipeRow from "./RecipeRow";
+import { Link } from "react-router";
 
-export default function HomePage() {
-  const [recipes, setRecipes] = useState([]);
+export default function MyRecipesPage() {
+  const access_token = localStorage.getItem("access_token");
+  const [myRecipes, setMyRecipes] = useState([]);
   const [regions, setRegions] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedRegion, setSelectedRegion] = useState("");
+  const isEditable = true;
 
   useEffect(() => {
-    async function fetchRecipes() {
+    async function fetchMyRecipes() {
       try {
-        const { data } = await api.get(`/recipes`, {
+        const { data } = await api.get(`/my-recipes`, {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
           params: {
             q: search,
             regionId: selectedRegion,
           },
         });
-        setRecipes(data.recipes);
+        setMyRecipes(data.recipes);
       } catch (error) {
-        console.log("🚀 ~ fetchRecipes ~ error:", error);
+        console.log("🚀 ~ fetchMyRecipes ~ error:", error);
       }
     }
-    fetchRecipes();
+    fetchMyRecipes();
   }, [search, selectedRegion]);
 
   useEffect(() => {
@@ -40,7 +46,7 @@ export default function HomePage() {
   return (
     <div className="py-4 flex-grow-1">
       <div className="text-center">
-        <h1>Recipe List</h1>
+        <h1>My Recipes</h1>
       </div>
       <div className="container mt-4">
         <div className="row g-3 mb-4">
@@ -69,6 +75,11 @@ export default function HomePage() {
             </select>
           </div>
         </div>
+        <div className="mb-4">
+          <Link to="/add-recipe" className="btn btn-primary">
+            Add Recipe
+          </Link>
+        </div>
         <table className="table table-striped">
           <thead>
             <tr>
@@ -79,8 +90,13 @@ export default function HomePage() {
             </tr>
           </thead>
           <tbody>
-            {recipes.map((recipe, index) => (
-              <RecipeRow key={recipe.id} recipe={recipe} index={index} />
+            {myRecipes.map((recipe, index) => (
+              <RecipeRow
+                key={recipe.id}
+                recipe={recipe}
+                index={index}
+                isEditable={isEditable}
+              />
             ))}
           </tbody>
         </table>
