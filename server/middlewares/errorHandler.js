@@ -14,6 +14,9 @@ const errorHandler = (error, req, res, next) => {
   } else if (error.statusCode) {
     statusCode = error.statusCode;
     message = error.message;
+  } else if (error.status === 503) {
+    statusCode = 503;
+    message = "Service Unavailable";
   }
 
   res.status(statusCode).json({ message });

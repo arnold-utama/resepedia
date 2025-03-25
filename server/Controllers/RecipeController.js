@@ -48,7 +48,7 @@ class RecipeController {
 
   static async getMyRecipes(req, res, next) {
     try {
-      const UserId  = req.user.id;
+      const UserId = req.user.id;
       const { q, regionId, page = 1 } = req.query;
       const limit = 20;
       const offset = (page - 1) * limit;
@@ -86,7 +86,12 @@ class RecipeController {
   static async getById(req, res, next) {
     try {
       const { id } = req.params;
-      const recipe = await Recipe.findByPk(id);
+      const recipe = await Recipe.findByPk(id, {
+        include: {
+          model: Region,
+          attributes: ["name"],
+        },
+      });
       if (!recipe) {
         return res.status(404).json({ message: "Recipe not found" });
       }
@@ -353,7 +358,7 @@ class RecipeController {
           ingredients.push(ingredient);
         }
       }
-      const prompt = `Create a JSON array of objects, format: {Ingredient: [alternative1, alternative2, ...]}. Ensure each ingredient has at least 3 alternatives. Exact keys: ${ingredients}`;
+      const prompt = `Create a JSON array of objects, format: {Ingredient: [alternative1, alternative2, ...]}. Ensure each ingredient has exactly 3 alternatives. Exact keys: ${ingredients}`;
       const result = await generateContent(prompt);
 
       try {
@@ -365,7 +370,7 @@ class RecipeController {
           message: "Failed to parse generated content",
         };
       }
-    } catch (error) {
+    } catch (error) {      
       next(error);
     }
   }
