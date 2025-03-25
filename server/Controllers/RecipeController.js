@@ -12,7 +12,7 @@ cloudinary.config({
 class RecipeController {
   static async getAll(req, res, next) {
     try {
-      const { q, regionId, page = 1 } = req.query;
+      const { q, regionId, page = 1, UserId } = req.query; // Added UserId to query parameters
       const limit = 10;
       const offset = (page - 1) * limit;
 
@@ -22,6 +22,9 @@ class RecipeController {
       }
       if (regionId) {
         where.RegionId = regionId;
+      }
+      if (UserId) {
+        where.UserId = UserId; // Added UserId to the where clause
       }
 
       const recipes = await Recipe.findAndCountAll({
