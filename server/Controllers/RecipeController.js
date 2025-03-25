@@ -338,7 +338,7 @@ class RecipeController {
   static async delete(req, res, next) {
     try {
       await req.recipe.destroy();
-      res.status(200).json({ message: "Recipe deleted successfully" });
+      res.status(200).json({ message: `Recipe "${req.recipe.name}" deleted successfully` });
     } catch (error) {
       next(error);
     }
