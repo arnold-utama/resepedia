@@ -8,6 +8,9 @@ const errorHandler = (error, req, res, next) => {
   } else if (error.name === "SequelizeValidationError") {
     statusCode = 400;
     message = error.errors.map((err) => err.message).join(", ");
+  } else if (error.name === "ParsingError") {
+    statusCode = 500;
+    message = error.message;
   } else if (error.statusCode) {
     statusCode = error.statusCode;
     message = error.message;

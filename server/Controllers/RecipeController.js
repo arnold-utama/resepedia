@@ -1,5 +1,6 @@
 const { Op } = require("sequelize");
 const { Recipe, Region } = require("../models");
+const { generateContent } = require("../helpers/gemini");
 
 class RecipeController {
   static async getAll(req, res, next) {
@@ -260,6 +261,34 @@ class RecipeController {
     try {
       await req.recipe.destroy();
       res.status(200).json({ message: "Recipe deleted successfully" });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async generate(req, res, next) {
+    try {
+      const { id } = req.params;
+      const recipe = await Recipe.findByPk(id);
+      if (!recipe) {
+        return res.status(404).json({ message: "Recipe not found" });
+      }
+      const ingredients = [];
+      for (let i = 1; i <= 20; i++) {
+        const ingredient = recipe[`ingredient${i}`];
+        if (ingredient) {
+          ingredients.push(ingredient);
+        }
+      }
+      const prompt = `Create a JSON array of objects, format: {Ingredient: [alternative1, alternative2, ...]}. Ensure each ingredient has at least 3 alternatives. Exact keys: ${ingredients}`;
+      const result = await generateContent(prompt);
+
+      try {
+        const parsedResult = JSON.parse(result.replace(/^```json\n|```$/g, ''));
+        res.status(200).json(parsedResult);
+      } catch (error) {
+        throw { name: "ParsingError", message: "Failed to parse generated content" };
+      }
     } catch (error) {
       next(error);
     }

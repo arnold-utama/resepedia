@@ -11,6 +11,7 @@ router.post("/login", UserController.login);
 router.post("/register", UserController.register);
 router.get("/recipes", RecipeController.getAll);
 router.get("/recipes/:id", RecipeController.getById);
+router.get("/recipes/:id/generate", RecipeController.generate);
 router.get("/regions", RegionController.getAll);
 
 router.use(authenticate);
