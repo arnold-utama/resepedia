@@ -23,12 +23,19 @@ export default function LoginPage() {
       localStorage.setItem("access_token", response.data.access_token);
       navigate("/");
     } catch (error) {
-      console.log("🚀 ~ handleRegister ~ error:", error);
+      console.log("🚀 ~ handleLogin ~ error:", error);
+      if (error.response?.data?.message) {
+        window.Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: error.response.data.message,
+        });
+      }
     }
   }
 
   return (
-    <div className="vh-100 vw-100 d-flex">
+    <div className="d-flex flex-grow-1">
       <div className="w-50 form-bg d-flex justify-content-center align-items-center">
         <form className="form w-100 p-5" onSubmit={handleLogin}>
           <div className="mb-4">
