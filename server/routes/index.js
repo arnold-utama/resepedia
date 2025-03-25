@@ -18,6 +18,7 @@ router.get("/recipes/:id/generate", RecipeController.generate);
 router.get("/regions", RegionController.getAll);
 
 router.use(authenticate);
+router.get("/my-recipes", RecipeController.getMyRecipes);
 router.post("/recipes", upload.single("file"), RecipeController.create);
 router.put("/recipes/:id", upload.single("file"), guardOwner, RecipeController.update);
 router.delete("/recipes/:id", guardOwner, RecipeController.delete);
