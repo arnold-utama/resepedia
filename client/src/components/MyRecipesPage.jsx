@@ -1,99 +1,28 @@
 import { useEffect, useState } from "react";
-import { api } from "../helpers/http-client";
 import RecipeRow from "./RecipeRow";
 import InfiniteScroll from "react-infinite-scroll-component";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchMyRecipes, deleteRecipe } from "../features/myrecipes/myRecipeSlice";
+import { fetchRegions } from "../features/regions/regionSlice";
 import { Link } from "react-router";
 
 export default function MyRecipesPage() {
-  const access_token = localStorage.getItem("access_token");
-  const [myRecipes, setMyRecipes] = useState([]);
-  const [regions, setRegions] = useState([]);
+  const dispatch = useDispatch();
+  const myRecipes = useSelector((state) => state.myRecipe.list.data);
+  const regions = useSelector((state) => state.region.list);
+  const totalPages = useSelector((state) => state.myRecipe.list.totalPages);
   const [search, setSearch] = useState("");
   const [selectedRegion, setSelectedRegion] = useState("");
-  const [pagination, setPagination] = useState({
-    totalData: 0,
-    totalPages: 0,
-    currentPage: 1,
-  });
+  const [currentPage, setCurrentPage] = useState(1);
   const isEditable = true;
 
-  async function fetchMyRecipes() {
-    try {
-      const { data } = await api.get(`/my-recipes`, {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-        },
-        params: {
-          q: search,
-          regionId: selectedRegion,
-          page: pagination.currentPage,
-        },
-      });
-      if (pagination.currentPage === 1) {
-        setMyRecipes(data.recipes);
-      } else {
-        setMyRecipes((prev) => [...prev, ...data.recipes]);
-      }
-      setPagination((prev) => ({
-        ...prev,
-        totalData: data.totalData,
-        totalPages: data.totalPages,
-      }));
-    } catch (error) {
-      console.log("🚀 ~ fetchMyRecipes ~ error:", error);
-    }
-  }
+  useEffect(() => {
+    dispatch(fetchMyRecipes({ search, selectedRegion, currentPage }));
+  }, [search, selectedRegion, currentPage]);
 
   useEffect(() => {
-    fetchMyRecipes();
-  }, [search, selectedRegion, pagination.currentPage]);
-
-  useEffect(() => {
-    async function fetchRegions() {
-      try {
-        const { data } = await api.get("/regions");
-        setRegions(data);
-      } catch (error) {
-        console.log("🚀 ~ fetchRegions ~ error:", error);
-      }
-    }
-    fetchRegions();
+    dispatch(fetchRegions());
   }, []);
-
-  async function handleDelete(id) {
-    window.Swal.fire({
-      title: "Are you sure you want to delete this recipe?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Delete",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          const response = await api.delete(`/recipes/${id}`, {
-            headers: { Authorization: `Bearer ${access_token}` },
-          });
-          window.Swal.fire({
-            title: "Success!",
-            text: `${response.data.message}`,
-            icon: "success",
-          });
-          fetchMyRecipes();
-        } catch (error) {
-          console.log("🚀 ~ handleDelete ~ error:", error);
-          if (error.response?.data?.message) {
-            window.Swal.fire({
-              icon: "error",
-              title: "Oops...",
-              text: `${error.response.data.message}`,
-            });
-          }
-        }
-      }
-    });
-  }
 
   return (
     <div className="py-4 flex-grow-1">
@@ -111,7 +40,7 @@ export default function MyRecipesPage() {
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
-                setPagination({ totalData: 0, totalPages: 0, currentPage: 1 });
+                setCurrentPage(1);
               }}
             />
           </div>
@@ -121,7 +50,7 @@ export default function MyRecipesPage() {
               value={selectedRegion}
               onChange={(e) => {
                 setSelectedRegion(e.target.value);
-                setPagination({ totalData: 0, totalPages: 0, currentPage: 1 });
+                setCurrentPage(1);
               }}
             >
               <option value="">All Regions</option>
@@ -143,13 +72,10 @@ export default function MyRecipesPage() {
           scrollThreshold={1}
           next={() => {
             setTimeout(() => {
-              setPagination((prev) => ({
-                ...prev,
-                currentPage: prev.currentPage + 1,
-              }));
+              setCurrentPage((prev) => prev + 1);
             }, 500);
           }}
-          hasMore={pagination.currentPage < pagination.totalPages}
+          hasMore={currentPage < totalPages}
           loader={
             <div
               className="d-flex justify-content-center align-items-center"
@@ -186,7 +112,7 @@ export default function MyRecipesPage() {
                   recipe={recipe}
                   index={index}
                   isEditable={isEditable}
-                  handleDelete={handleDelete}
+                  handleDelete={(id) => dispatch(deleteRecipe(id))}
                 />
               ))}
             </tbody>

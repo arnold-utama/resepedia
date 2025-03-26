@@ -1,56 +1,25 @@
 import { useEffect, useState } from "react";
-import { api } from "../helpers/http-client";
 import RecipeRow from "./RecipeRow";
 import InfiniteScroll from "react-infinite-scroll-component";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchRecipes } from "../features/recipes/recipeSlice";
+import { fetchRegions } from "../features/regions/regionSlice";
 
 export default function HomePage() {
-  const [recipes, setRecipes] = useState([]);
-  const [regions, setRegions] = useState([]);
+  const dispatch = useDispatch();
+  const recipes = useSelector((state) => state.recipe.list.data);
+  const regions = useSelector((state) => state.region.list);
+  const totalPages = useSelector((state) => state.recipe.list.totalPages);
   const [search, setSearch] = useState("");
   const [selectedRegion, setSelectedRegion] = useState("");
-  const [pagination, setPagination] = useState({
-    totalData: 0,
-    totalPages: 0,
-    currentPage: 1,
-  });
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    async function fetchRecipes() {
-      try {
-        const { data } = await api.get(`/recipes`, {
-          params: {
-            q: search,
-            regionId: selectedRegion,
-            page: pagination.currentPage,
-          },
-        });
-        if (pagination.currentPage === 1) {
-          setRecipes(data.recipes);
-        } else {
-          setRecipes((prev) => [...prev, ...data.recipes]);
-        }
-        setPagination((prev) => ({
-          ...prev,
-          totalData: data.totalData,
-          totalPages: data.totalPages,
-        }));
-      } catch (error) {
-        console.log("🚀 ~ fetchRecipes ~ error:", error);
-      }
-    }
-    fetchRecipes();
-  }, [search, selectedRegion, pagination.currentPage]);
+    dispatch(fetchRecipes({ search, selectedRegion, currentPage }));
+  }, [search, selectedRegion, currentPage]);
 
   useEffect(() => {
-    async function fetchRegions() {
-      try {
-        const { data } = await api.get("/regions");
-        setRegions(data);
-      } catch (error) {
-        console.log("🚀 ~ fetchRegions ~ error:", error);
-      }
-    }
-    fetchRegions();
+    dispatch(fetchRegions());
   }, []);
 
   return (
@@ -69,7 +38,7 @@ export default function HomePage() {
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
-                setPagination({ totalData: 0, totalPages: 0, currentPage: 1 });
+                setCurrentPage(1);
               }}
             />
           </div>
@@ -79,7 +48,7 @@ export default function HomePage() {
               value={selectedRegion}
               onChange={(e) => {
                 setSelectedRegion(e.target.value);
-                setPagination({ totalData: 0, totalPages: 0, currentPage: 1 });
+                setCurrentPage(1);
               }}
             >
               <option value="">All Regions</option>
@@ -96,13 +65,10 @@ export default function HomePage() {
           scrollThreshold={1}
           next={() => {
             setTimeout(() => {
-              setPagination((prev) => ({
-                ...prev,
-                currentPage: prev.currentPage + 1,
-              }));
+              setCurrentPage((prev) => prev + 1);
             }, 500);
           }}
-          hasMore={pagination.currentPage < pagination.totalPages}
+          hasMore={currentPage < totalPages}
           loader={
             <div
               className="d-flex justify-content-center align-items-center"

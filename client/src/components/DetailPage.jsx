@@ -1,22 +1,17 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { api } from "../helpers/http-client";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchRecipeById } from "../features/recipes/recipeSlice";
 
 export default function DetailPage() {
   const { id } = useParams();
-  const [recipe, setRecipe] = useState({});
+  const dispatch = useDispatch();
+  const recipe = useSelector((state) => state.recipe.detail);
   const [alternatives, setAlternatives] = useState({});
 
   useEffect(() => {
-    async function fetchRecipe() {
-      try {
-        const { data } = await api.get(`/recipes/${id}`);
-        setRecipe(data);
-      } catch (error) {
-        console.log("🚀 ~ fetchRecipe ~ error:", error);
-      }
-    }
-    fetchRecipe();
+    dispatch(fetchRecipeById(id));    
   }, []);
 
   const generateAlternatives = async () => {
