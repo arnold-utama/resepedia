@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../helpers/http-client";
 import RecipeRow from "./RecipeRow";
+import InfiniteScroll from "react-infinite-scroll-component";
 import { Link } from "react-router";
 
 export default function MyRecipesPage() {
@@ -9,6 +10,11 @@ export default function MyRecipesPage() {
   const [regions, setRegions] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedRegion, setSelectedRegion] = useState("");
+  const [pagination, setPagination] = useState({
+    totalData: 0,
+    totalPages: 0,
+    currentPage: 1,
+  });
   const isEditable = true;
 
   async function fetchMyRecipes() {
@@ -20,9 +26,19 @@ export default function MyRecipesPage() {
         params: {
           q: search,
           regionId: selectedRegion,
+          page: pagination.currentPage,
         },
       });
-      setMyRecipes(data.recipes);
+      if (pagination.currentPage === 1) {
+        setMyRecipes(data.recipes);
+      } else {
+        setMyRecipes((prev) => [...prev, ...data.recipes]);
+      }
+      setPagination((prev) => ({
+        ...prev,
+        totalData: data.totalData,
+        totalPages: data.totalPages,
+      }));
     } catch (error) {
       console.log("🚀 ~ fetchMyRecipes ~ error:", error);
     }
@@ -30,7 +46,7 @@ export default function MyRecipesPage() {
 
   useEffect(() => {
     fetchMyRecipes();
-  }, [search, selectedRegion]);
+  }, [search, selectedRegion, pagination.currentPage]);
 
   useEffect(() => {
     async function fetchRegions() {
@@ -93,14 +109,20 @@ export default function MyRecipesPage() {
               placeholder="Search menu"
               aria-label="Search"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPagination({ totalData: 0, totalPages: 0, currentPage: 1 });
+              }}
             />
           </div>
           <div className="col-3">
             <select
               className="form-select"
               value={selectedRegion}
-              onChange={(e) => setSelectedRegion(e.target.value)}
+              onChange={(e) => {
+                setSelectedRegion(e.target.value);
+                setPagination({ totalData: 0, totalPages: 0, currentPage: 1 });
+              }}
             >
               <option value="">All Regions</option>
               {regions.map((region) => (
@@ -116,27 +138,60 @@ export default function MyRecipesPage() {
             Add Recipe
           </Link>
         </div>
-        <table className="table table-striped">
-          <thead>
-            <tr>
-              <th className="col-1">#</th>
-              <th className="col-auto">Name</th>
-              <th className="col-1">Region</th>
-              <th className="col-3"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {myRecipes.map((recipe, index) => (
-              <RecipeRow
-                key={recipe.id}
-                recipe={recipe}
-                index={index}
-                isEditable={isEditable}
-                handleDelete={handleDelete}
-              />
-            ))}
-          </tbody>
-        </table>
+        <InfiniteScroll
+          dataLength={myRecipes.length}
+          scrollThreshold={1}
+          next={() => {
+            setTimeout(() => {
+              setPagination((prev) => ({
+                ...prev,
+                currentPage: prev.currentPage + 1,
+              }));
+            }, 500);
+          }}
+          hasMore={pagination.currentPage < pagination.totalPages}
+          loader={
+            <div
+              className="d-flex justify-content-center align-items-center"
+              style={{ height: "3rem" }}
+            >
+              <div
+                className="spinner-border"
+                role="status"
+                style={{ height: "1.5rem", width: "1.5rem" }}
+              >
+                <span className="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          }
+          endMessage={
+            <p className="text-center">
+              <b>{myRecipes.length ? "" : "No data"}</b>
+            </p>
+          }
+        >
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th className="col-1">#</th>
+                <th className="col-auto">Name</th>
+                <th className="col-1">Region</th>
+                <th className="col-3"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {myRecipes.map((recipe, index) => (
+                <RecipeRow
+                  key={recipe.id}
+                  recipe={recipe}
+                  index={index}
+                  isEditable={isEditable}
+                  handleDelete={handleDelete}
+                />
+              ))}
+            </tbody>
+          </table>
+        </InfiniteScroll>
       </div>
     </div>
   );
