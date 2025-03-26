@@ -1,4 +1,5 @@
 import { Link, NavLink, useNavigate } from "react-router";
+import Logo from "../assets/logo.svg";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -24,7 +25,16 @@ export default function Navbar() {
   return (
     <nav className="navbar navbar-expand-lg bg-body-tertiary">
       <div className="container-fluid">
-        <span className="navbar-brand">Resepedia</span>
+        <span
+          className="navbar-brand d-flex align-items-center py-0"
+        >
+          <img
+            src={Logo}
+            alt="Logo"
+            style={{ height: "2rem", marginRight: "5px" }}
+          />
+          Resepedia
+        </span>
         <button
           className="navbar-toggler"
           type="button"
