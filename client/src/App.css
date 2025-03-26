@@ -1,5 +1,5 @@
 body {
-  background-color: whitesmoke
+  background-color: whitesmoke;
 }
 
 .cooking-bg {
@@ -8,6 +8,9 @@ body {
 }
 
 .navbar {
-  background-color: wheat !important;
+  background-color: #cda678 !important; /* Dark wood color */
 }
 
+.text-red {
+  color: red;
+}

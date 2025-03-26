@@ -1,4 +1,4 @@
-import { Link, NavLink, useNavigate } from "react-router";
+import { NavLink, useNavigate } from "react-router";
 import Logo from "../assets/logo.svg";
 
 export default function Navbar() {
@@ -25,15 +25,13 @@ export default function Navbar() {
   return (
     <nav className="navbar navbar-expand-lg bg-body-tertiary">
       <div className="container-fluid">
-        <span
-          className="navbar-brand d-flex align-items-center py-0"
-        >
+        <span className="navbar-brand d-flex align-items-center py-0">
           <img
             src={Logo}
             alt="Logo"
             style={{ height: "2rem", marginRight: "5px" }}
           />
-          Resepedia
+          <span className="fw-bold text-red">Resep</span><span className="text-white">edia</span>
         </span>
         <button
           className="navbar-toggler"
@@ -68,10 +66,7 @@ export default function Navbar() {
           <ul className="navbar-nav ms-auto">
             <li className="nav-item">
               {access_token ? (
-                <button
-                  onClick={handleLogout}
-                  className="nav-link"
-                >
+                <button onClick={handleLogout} className="nav-link">
                   Logout
                 </button>
               ) : (

@@ -66,8 +66,8 @@ export default function DetailPage() {
       </div>
       <div className="mb-4">
         <h2 className="h4">Ingredients</h2>
-        <button className="btn btn-outline-info mb-3" onClick={generateAlternatives}>
-          Generate Alternatives
+        <button className="btn btn-outline-secondary mb-3" onClick={generateAlternatives}>
+          Generate Alternative Ingredients
         </button>
         <table
           className="table table-bordered"
