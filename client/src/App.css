@@ -1,0 +1,16 @@
+body {
+  background-color: whitesmoke;
+}
+
+.cooking-bg {
+  background-image: url("./assets/cooking.jpg");
+  background-size: 50%;
+}
+
+.navbar {
+  background-color: #cda678 !important; /* Dark wood color */
+}
+
+.text-red {
+  color: red;
+}
