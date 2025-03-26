@@ -1,9 +1,13 @@
-.form-bg {
-  background-color: ghostwhite;
+body {
+  background-color: whitesmoke
 }
 
 .cooking-bg {
   background-image: url("./assets/cooking.jpg");
   background-size: 50%;
+}
+
+.navbar {
+  background-color: wheat !important;
 }
 

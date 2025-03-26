@@ -30,7 +30,7 @@ export default function RegisterPage() {
   return (
     <div className="d-flex flex-grow-1">
       <div className="w-50 cooking-bg"></div>
-      <div className="w-50 form-bg d-flex justify-content-center align-items-center">
+      <div className="w-50 d-flex justify-content-center align-items-center">
         <form className="form w-100 p-5" onSubmit={handleRegister}>
           <div className="mb-4">
             <h1 className="fw-bold">Create your account</h1>

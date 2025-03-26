@@ -36,7 +36,7 @@ export default function LoginPage() {
 
   return (
     <div className="d-flex flex-grow-1">
-      <div className="w-50 form-bg d-flex justify-content-center align-items-center">
+      <div className="w-50 d-flex justify-content-center align-items-center">
         <form className="form w-100 p-5" onSubmit={handleLogin}>
           <div className="mb-4">
             <h1 className="fw-bold">Login to your account</h1>
