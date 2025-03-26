@@ -36,7 +36,7 @@ class RecipeController {
       });
 
       res.status(200).json({
-        totalItems: recipes.count,
+        totalData: recipes.count,
         totalPages: Math.ceil(recipes.count / limit),
         currentPage: parseInt(page),
         recipes: recipes.rows,
