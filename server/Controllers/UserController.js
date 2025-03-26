@@ -17,7 +17,7 @@ class UserController {
       if (!user || !comparePassword(password, user.password)) {
         throw { statusCode: 401, message: "Invalid email or password" };
       }
-      const access_token = signToken({ id: user.id, email: user.email });
+      const access_token = signToken({ id: user.id });
       res.status(200).json({ access_token });
     } catch (error) {
       next(error);
