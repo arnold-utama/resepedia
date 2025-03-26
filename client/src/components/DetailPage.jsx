@@ -21,6 +21,14 @@ export default function DetailPage() {
 
   const generateAlternatives = async () => {
     try {
+      window.Swal.fire({
+        title: "Please wait...",
+        text: "Processing your request",
+        allowOutsideClick: false,
+        didOpen: () => {
+          window.Swal.showLoading();
+        },
+      });
       const { data } = await api.get(`/recipes/${id}/generate`);
       const formattedAlternatives = {};
       data.forEach((item) => {
@@ -28,6 +36,7 @@ export default function DetailPage() {
         formattedAlternatives[key] = values;
       });
       setAlternatives(formattedAlternatives);
+      window.Swal.close();
     } catch (error) {
       console.log("🚀 ~ generateAlternatives ~ error:", error);
       if (error.response?.data?.message) {
