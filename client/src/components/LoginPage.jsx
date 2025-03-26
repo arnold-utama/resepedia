@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router";
 import { api } from "../helpers/http-client";
 
@@ -8,6 +8,27 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  useEffect(() => {
+    console.log("Google Client ID:", import.meta.env.VITE_GOOGLE_CLIENT_ID);
+
+    window.google.accounts.id.initialize({
+      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+      callback: async (response) => {
+        console.log("Encoded JWT ID token: " + response.credential);
+        const { data } = await api.post("/auth/google", {
+          googleToken: response.credential,
+        });
+        localStorage.setItem("access_token", data.access_token);
+        navigate("/");
+      },
+    });
+    window.google.accounts.id.renderButton(
+      document.getElementById("buttonDiv"),
+      { theme: "outline", size: "large" }
+    );
+    window.google.accounts.id.prompt();
+  }, []);
 
   if (access_token) {
     return <Navigate to={"/"} />;
@@ -67,9 +88,15 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <button type="submit" className="btn btn-danger mt-4 w-100">
-            Login
-          </button>
+          <div className="mt-4 d-flex gap-2 justify-content-center">
+            <button type="submit" className="btn btn-danger w-50">
+              Login
+            </button>
+            <div className="d-flex align-items-center">
+              <p className="m-0 text-center">or</p>
+            </div>
+            <div className="w-50" id="buttonDiv"></div>
+          </div>
           <p className="text-center mt-3">
             Don't have account?{" "}
             <Link to={"/register"} className="text-danger">

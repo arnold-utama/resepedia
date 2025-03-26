@@ -11,6 +11,7 @@ const upload = multer({ storage: storage });
 
 router.get("/", (req, res) => res.redirect("/recipes"));
 router.post("/login", UserController.login);
+router.post('/auth/google', UserController.googleLogin);
 router.post("/register", UserController.register);
 router.get("/recipes", RecipeController.getAll);
 router.get("/recipes/:id", RecipeController.getById);
