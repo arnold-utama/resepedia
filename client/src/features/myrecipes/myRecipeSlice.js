@@ -1,7 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { api } from "../../helpers/http-client";
 
-const access_token = localStorage.getItem("access_token");
 const initialState = {
   list: {
     data: [],
@@ -48,6 +47,7 @@ const myRecipeSlice = createSlice({
 export const fetchMyRecipes = createAsyncThunk(
   "myrecipe/fetchMyRecipes",
   async ({ search, selectedRegion, currentPage }) => {
+    const access_token = localStorage.getItem("access_token");
     const { data } = await api.get("/my-recipes", {
       params: {
         q: search,
@@ -57,7 +57,7 @@ export const fetchMyRecipes = createAsyncThunk(
       headers: {
         Authorization: `Bearer ${access_token}`,
       },
-    });    
+    });
     return data;
   }
 );
@@ -65,6 +65,7 @@ export const fetchMyRecipes = createAsyncThunk(
 export const deleteRecipe = createAsyncThunk(
   "myrecipe/deleteRecipe",
   async (id) => {
+    const access_token = localStorage.getItem("access_token");
     await api.delete(`/recipes/${id}`, {
       headers: {
         Authorization: `Bearer ${access_token}`,
